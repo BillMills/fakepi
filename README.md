@@ -18,7 +18,7 @@ crontab -e
 * * * * * curl localhost:5000/update
 ```
 
-Students can now hit <IP>/<varname> to get an object:
+Students can now hit `<IP>/<varname>` to get an object:
 
 ```
 {
