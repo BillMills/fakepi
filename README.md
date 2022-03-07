@@ -18,14 +18,14 @@ crontab -e
 * * * * * curl localhost:5000/update
 ```
 
-Students can now hit `<IP>/<varname>` to get an object:
+Students can now hit `<IP>greenhouse?<varname>` to get an object, where `<varname>` is either `humidity` or `temperature`:
 
 ```
 {
     <varname>: [
         {
             "timestamp": yyyy-mm-ddThh:mm:ss.ssssss+00:00,
-            "val": some random float shaped by a helper function, faking humidity at the time of writing
+            "val": some random float shaped by a helper function, faking humidity or temperature at the time of writing
         }
     ]
 }

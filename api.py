@@ -1,5 +1,5 @@
-import random, datetime
-from flask import Flask
+import random, datetime, math
+from flask import Flask, request
 
 app = Flask(__name__)
 
@@ -23,26 +23,55 @@ def fakeHumidity(minofday):
     else:
         return low + (random.random()-1)*jitter
 
-data = []
+def fakeTemperature(minofday):
+    minute = (minofday - 300)%1440
+    period = 1440
+    hottest = 780
+    average = 50
+    amplitude = 10
+
+    return average + amplitude*math.cos( (minute - hottest)*2*math.pi/period )
+
 start = datetime.datetime.now()
+
+humidity = []
+temperature = []
 for i in range(1440):
     ts = start - datetime.timedelta(minutes=1440-i)
     point = {
         "val": fakeHumidity(ts.hour*60 + ts.minute),
         "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")
     }
-    data.append(point)
+    humidity.append(point)
 
-@app.route("/<val>")
-def hello_world(val):
-    return {val: data}
+    point = {
+        "val": fakeTemperature(ts.hour*60 + ts.minute),
+        "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")   
+    }
+    temperature.append(point)
+
+
+@app.route("/greenhouse")
+def hello_world():
+    if 'humidity' in request.args:
+        return {"humidity": humidity}
+    elif 'temperature' in request.args:
+        return {"temperature": temperature}
+    else:
+        return "Unrecognized query string parameter; should be ?humidity or ?temperature"
 
 @app.route("/update")
 def up():
-    data.pop(0)
+    humidity.pop(0)
+    temperature.pop(0)
     ts = datetime.datetime.now()
-    data.append({
+    humidity.append({
         "val": fakeHumidity(ts.hour*60 + ts.minute),
         "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")   
     })
+    temperature.append({
+        "val": fakeTemperature(ts.hour*60 + ts.minute),
+        "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")   
+    })
+
     return "OK"
